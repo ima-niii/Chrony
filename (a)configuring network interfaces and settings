@@ -1,0 +1,82 @@
+ 5.(a) Configuring Network Interfaces and Network Settings on Fedora Server
+
+Proper network configuration is essential for ensuring your server can communicate with other devices and services on your network.
+Fedora uses **NetworkManager** to manage network interfaces and settings.
+
+ 1. View Current Network Settings
+You can check existing network connections and interface details using:
+nmcli connection show
+ip addr show
+ip a
+nmcli connection show → lists all configured network connections
+ip addr show → displays IP addresses assigned to all interfaces
+
+2. Network Configuration Files
+Network configuration files are located in:
+sudo nano /etc/sysconfig/network-scripts/ifcfg-ens160
+Typical file names: ifcfg-eth0, ifcfg-ens160, etc replace file name with yours
+
+Common Parameters:
+DEVICE → network interface name (e.g., eth0, ens160)
+BOOTPROTO → how IP is obtained (dhcp or static)
+IPADDR → static IP address (if BOOTPROTO=static)
+NETMASK → subnet mask
+GATEWAY → default gateway
+DNS1, DNS2 → DNS servers
+ONBOOT → start interface at boot (yes or no)
+
+Example Static Configuration
+File: /etc/sysconfig/network-scripts/ifcfg-ens160
+TYPE=Ethernet
+BOOTPROTO=static
+IPADDR=192.168.193.100
+NETMASK=255.255.255.0
+GATEWAY=192.168.193.1
+DNS1=8.8.8.8
+DNS2=8.8.4.4
+ONBOOT=yes
+
+Save changes and exit the editor.(ctrl+o,enter,ctrl+x)
+
+3. Restart Networking
+Apply changes after editing configuration files:
+sudo systemctl restart NetworkManager
+
+Ensures new network settings are applied
+
+4. NetworkManager Command Line (nmcli)
+You can also configure interfaces directly via nmcli
+i) Add a new connection:
+sudo nmcli connection add con-name "MyConnection" ifname eth0 type ethernet ip4 192.168.1.100/24 gw4 192.168.1.1
+
+ii) Set DNS servers:
+sudo nmcli connection modify "MyConnection" ipv4.dns "8.8.8.8 8.8.4.4"
+
+iii) Activate the connection:
+sudo nmcli connection up "MyConnection"
+
+5. NetworkManager GUI
+Fedora Server provides a text-based GUI for network configuration:
+sudo nmtui
+
+Allows interactive editing of connections, IP addresses, and DNS
+Alternatively, use the desktop Network Settings application if available
+
+6. Firewall Configuration
+Ensure your firewall allows required traffic for services:
+sudo firewall-cmd --permanent --add-service=<service_name>
+sudo firewall-cmd --reload
+
+Replace <service_name> with the service you want to allow (e.g., http, https, ssh)
+
+7. Network Troubleshooting
+Common tools to diagnose network issues:
+ping <IP_or_hostname>
+traceroute <IP_or_hostname>
+ifconfig
+ip addr
+
+ping → checks connectivity
+traceroute → shows path to host
+
+ifconfig / ip addr → checks interface and IP configuration
